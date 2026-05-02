@@ -3,6 +3,11 @@
 Language:
 [English](README.md) | [繁體中文](README_zh.md)
 
+![CI](https://github.com/DraganLegend/ros2-pqc-secure-comm/actions/workflows/ci.yml/badge.svg)
+![ROS 2](https://img.shields.io/badge/ROS%202-Humble-blue)
+![Python](https://img.shields.io/badge/Python-3.x-blue)
+![License](https://img.shields.io/badge/License-Apache--2.0-green)
+
 ## 🔐 Project Overview
 
 A ROS 2 application-layer secure communication pipeline using post-quantum
@@ -87,6 +92,25 @@ python3 scripts/run_and_plot_benchmark.py \
 - Publish rate: 20 Hz
 - Metric: end-to-end command delivery latency
 - Mode comparison: plain vs app_sig
+
+## Known Limitations
+
+- This MVP focuses on application-layer command integrity and authenticity.
+- Payload encryption is not included.
+- Dynamic key exchange and key rotation are not implemented.
+- `sign_ns` is reserved for future signer-side timing and is currently recorded as 0.
+- Current benchmark results are from a local single-machine run.
+- Cross-device and real-robot network latency are future evaluation targets.
+
+## Future Work
+
+- Add two-container benchmark scenarios for distributed ROS 2 communication.
+- Add cross-device benchmark over Wi-Fi or VPN.
+- Add signer-side timing instrumentation.
+- Add key rotation and trust-store update workflow.
+- Evaluate ML-KEM-based session-key establishment for future encrypted channels.
+- Compare SROS2 / DDS-Security with this application-layer PQC approach.
+- Integrate with Nav2 or TurtleBot3 command pipelines.
 
 ## Documentation
 

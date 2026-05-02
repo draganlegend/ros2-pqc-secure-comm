@@ -3,6 +3,11 @@
 語言：
 [English](README.md) | [繁體中文](README_zh.md)
 
+![CI](https://github.com/DraganLegend/ros2-pqc-secure-comm/actions/workflows/ci.yml/badge.svg)
+![ROS 2](https://img.shields.io/badge/ROS%202-Humble-blue)
+![Python](https://img.shields.io/badge/Python-3.x-blue)
+![License](https://img.shields.io/badge/License-Apache--2.0-green)
+
 ## 🔐 專案概述
 
 一個 ROS 2 應用層安全通訊 pipeline，使用 post-quantum signature
@@ -84,6 +89,25 @@ python3 scripts/run_and_plot_benchmark.py \
 - Publish rate: 20 Hz
 - Metric: 端到端命令傳遞延遲
 - Mode comparison: plain vs app_sig
+
+## 已知限制
+
+- 本 MVP 聚焦於應用層控制命令的完整性與來源驗證。
+- 尚未提供 payload encryption。
+- 尚未實作 dynamic key exchange 與 key rotation。
+- `sign_ns` 保留給未來 signer-side timing，目前紀錄為 0。
+- 目前 benchmark 結果來自本機單機測試。
+- 跨裝置與真實機器人網路延遲屬於後續評估方向。
+
+## 後續工作
+
+- 增加兩個 container 的分散式 ROS 2 benchmark 情境。
+- 增加跨裝置 Wi-Fi 或 VPN benchmark。
+- 補上 signer-side timing instrumentation。
+- 加入 key rotation 與 trust-store update workflow。
+- 評估 ML-KEM session-key establishment，作為未來 encrypted channel 的基礎。
+- 比較 SROS2 / DDS-Security 與本專案應用層 PQC 方法的差異。
+- 整合 Nav2 或 TurtleBot3 command pipeline。
 
 ## 文件連結
 

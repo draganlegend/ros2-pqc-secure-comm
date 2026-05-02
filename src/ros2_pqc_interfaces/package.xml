@@ -3,7 +3,7 @@
   <name>ros2_pqc_interfaces</name>
   <version>0.1.0</version>
   <description>ROS 2 interfaces for the ros2-pqc-secure-comm v1 MVP.</description>
-  <maintainer email="REPLACE_WITH_PUBLIC_EMAIL">mike32874225@gmail.com</maintainer>
+  <maintainer email="mike32874225@gmail.com">Mike Lee</maintainer>
   <license>Apache-2.0</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
