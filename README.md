@@ -1,5 +1,8 @@
 # ros2-pqc-secure-comm
 
+Language:
+[English](README.md) | [繁體中文](README_zh.md)
+
 ## 🔐 Project Overview
 
 A ROS 2 application-layer secure communication pipeline using post-quantum
@@ -50,15 +53,44 @@ latency and should not be interpreted as "always under 10 ms."
 
 </details>
 
-Language / 語言:
+## Reproduce Benchmark
 
-- [繁體中文 README](README_zh.md)
-- [English README](README_en.md)
+Full benchmark run:
 
-Documentation / 文件:
+```bash
+source /opt/ros/humble/setup.bash
+source install/setup.bash
 
-- [繁體中文教學](docs/tutorial_zh.md)
-- [English tutorial](docs/tutorial_en.md)
+python3 scripts/run_and_plot_benchmark.py \
+  --count 100 \
+  --rate-hz 20 \
+  --keys-dir ./src/keys \
+  --output-dir docs
+```
+
+Plot-only mode uses existing CSV files and regenerates plots without re-running
+ROS 2 benchmark launch files:
+
+```bash
+python3 scripts/run_and_plot_benchmark.py \
+  --plot-only \
+  --plain-csv docs/benchmark_plain.csv \
+  --app-sig-csv docs/benchmark_app_sig.csv \
+  --output-dir docs
+```
+
+## Benchmark Environment
+
+- ROS 2 Humble
+- Local single-machine benchmark
+- Count: 100
+- Publish rate: 20 Hz
+- Metric: end-to-end command delivery latency
+- Mode comparison: plain vs app_sig
+
+## Documentation
+
+- [Tutorial](docs/tutorial_en.md) / [繁體中文教學](docs/tutorial_zh.md)
 - [架構說明](docs/architecture_zh.md) / [Architecture](docs/architecture_en.md)
 - [威脅模型](docs/threat_model_zh.md) / [Threat model](docs/threat_model_en.md)
 - [訊息格式](docs/message_spec_zh.md) / [Message spec](docs/message_spec_en.md)

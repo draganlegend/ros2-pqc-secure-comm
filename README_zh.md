@@ -1,164 +1,94 @@
 # ros2-pqc-secure-comm
 
-`ros2-pqc-secure-comm` 是一個 ROS 2 Humble 的應用層命令保護 MVP。它示範如何用 ML-DSA-44 對 `geometry_msgs/Twist` 控制命令做簽章、驗章、SHA-256 digest 檢查、sequence replay protection、TTL 驗證，以及 benchmark CSV 輸出。
+語言：
+[English](README.md) | [繁體中文](README_zh.md)
 
-這個專案不是 SROS2，也不是 DDS-Security 的替代品。它只保護命令語意層，目標是讓下游控制節點仍然接收一般 `Twist`，同時在上游加入可量測的 post-quantum signature pipeline。
+## 🔐 專案概述
 
-## 功能
+一個 ROS 2 應用層安全通訊 pipeline，使用 post-quantum signature
+（ML-DSA-44）保護控制命令。
+
+這個專案確保：
+
+- 命令完整性（SHA-256 digest）
+- 來源真實性（ML-DSA signature）
+- 重送防護（sequence window）
+- 過期控制（TTL validation）
+- 可量測延遲（benchmark CSV）
+
+它運作在應用層，不取代 DDS-Security 或 SROS2。
+
+## 🏗 系統架構
+
+![architecture](docs/architecture.png)
+
+## 📊 效能測試結果
+
+benchmark 比較 plain ROS 2 command path 與 application-layer signed command
+pipeline。延遲以端到端命令傳遞時間計算。
+
+| Mode | Samples | p50 e2e | p95 e2e | p99 e2e | Max | Success Rate |
+|------|--------:|--------:|--------:|--------:|----:|-------------:|
+| plain | 100 | 0.745 ms | 1.119 ms | 1.231 ms | 1.262 ms | 100% |
+| app_sig | 99 | 3.269 ms | 7.456 ms | 116.083 ms | 162.747 ms | 100% |
+
+`app_sig` 路徑加入預期中的簽章與驗章 overhead，同時主要延遲分布仍維持在低範圍。
+大多數 `app_sig` 樣本會在個位數毫秒內完成，但少數 outliers 造成 long-tail latency
+distribution。因此 p99 受到 tail latency 影響，不應解讀成「永遠低於 10 ms」。
+
+### 延遲分布（主要範圍）
+
+![latency](docs/fig_latency_box_zoom.png)
+
+### 端到端延遲 CDF
+
+![cdf](docs/fig_latency_cdf.png)
+
+<details>
+<summary>完整延遲範圍（包含 outliers）</summary>
+
+![full](docs/fig_latency_box_full.png)
+
+</details>
+
+## 重現 Benchmark
+
+完整 benchmark 執行：
+
+```bash
+source /opt/ros/humble/setup.bash
+source install/setup.bash
+
+python3 scripts/run_and_plot_benchmark.py \
+  --count 100 \
+  --rate-hz 20 \
+  --keys-dir ./src/keys \
+  --output-dir docs
+```
+
+plot-only mode 會使用既有 CSV 檔重新產生圖表，不重新執行 ROS 2 benchmark launch files：
+
+```bash
+python3 scripts/run_and_plot_benchmark.py \
+  --plot-only \
+  --plain-csv docs/benchmark_plain.csv \
+  --app-sig-csv docs/benchmark_app_sig.csv \
+  --output-dir docs
+```
+
+## Benchmark 環境
 
 - ROS 2 Humble
-- Python-first implementation
-- `geometry_msgs/Twist` command demo
-- ML-DSA-44 signature and verification
-- SHA-256 canonical payload digest
-- static trust store
-- sequence-based replay protection
-- TTL / age validation
-- plain mode and app_sig mode
-- benchmark CSV output
-- arm64 Docker development flow
+- 本機單機 benchmark
+- Count: 100
+- Publish rate: 20 Hz
+- Metric: 端到端命令傳遞延遲
+- Mode comparison: plain vs app_sig
 
-## 專案結構
+## 文件連結
 
-```text
-src/
-├── ros2_pqc_interfaces   # SignedTwist / VerificationEvent messages
-├── ros2_pqc_crypto       # adapter, OQS backend, key store, replay window
-├── ros2_pqc_signer       # /cmd_vel/raw -> /cmd_vel/signed
-├── ros2_pqc_verifier     # /cmd_vel/signed -> /cmd_vel/verified + events
-├── ros2_pqc_demo         # demo publisher and echo nodes
-├── ros2_pqc_bench        # benchmark runner and CSV summary
-├── ros2_pqc_bringup      # launch files and configs
-└── keys                  # demo key material and trust store
-```
-
-## 快速開始
-
-建立 arm64 image：
-
-```bash
-docker build --no-cache \
-  --platform linux/arm64/v8 \
-  -t ros2-pqc-dev:humble-arm64 .
-```
-
-啟動 container：
-
-```bash
-docker run -it --rm \
-  --platform linux/arm64/v8 \
-  -v /Users/draganlegend/Documents/ros2_ws:/ros2_ws \
-  -w /ros2_ws \
-  ros2-pqc-dev:humble-arm64
-```
-
-在 container 內編譯：
-
-```bash
-source /opt/ros/humble/setup.bash
-colcon build --symlink-install
-source install/setup.bash
-```
-
-確認 package：
-
-```bash
-ros2 pkg list | grep ros2_pqc
-ros2 interface show ros2_pqc_interfaces/msg/SignedTwist
-```
-
-## 產生 demo keys
-
-私鑰不應 commit。第一次執行 demo 前，在 container 內產生 demo key：
-
-```bash
-source /opt/ros/humble/setup.bash
-source /ros2_ws/install/setup.bash
-
-ros2 run ros2_pqc_crypto pqc_generate_demo_keys \
-  --keys-dir /ros2_ws/src/keys \
-  --overwrite
-```
-
-產生的私鑰位於：
-
-```text
-src/keys/signer/mldsa44_private.key
-```
-
-這只適合 demo，不可用於正式環境。
-
-## 執行 demo
-
-plain mode：
-
-```bash
-ros2 launch ros2_pqc_bringup plain.launch.py
-```
-
-app_sig mode：
-
-```bash
-ros2 launch ros2_pqc_bringup app_sig.launch.py \
-  keys_dir:=/ros2_ws/src/keys
-```
-
-app_sig topic graph：
-
-```text
-/cmd_vel/raw
-  -> ros2_pqc_signer
-  -> /cmd_vel/signed
-  -> ros2_pqc_verifier
-  -> /cmd_vel/verified
-  -> verified_cmd_echo
-
-ros2_pqc_verifier
-  -> /pqc/verify_event
-```
-
-## Benchmark
-
-plain benchmark：
-
-```bash
-ros2 launch ros2_pqc_bringup bench_plain.launch.py \
-  count:=100 \
-  rate_hz:=20 \
-  output_csv:=/tmp/ros2_pqc_plain.csv
-```
-
-app_sig benchmark：
-
-```bash
-ros2 launch ros2_pqc_bringup bench_app_sig.launch.py \
-  count:=100 \
-  rate_hz:=20 \
-  output_csv:=/tmp/ros2_pqc_app_sig.csv \
-  keys_dir:=/ros2_ws/src/keys
-```
-
-輸出摘要：
-
-```bash
-ros2 run ros2_pqc_bench pqc_bench_summary /tmp/ros2_pqc_app_sig.csv
-```
-
-CSV 欄位：
-
-```text
-run_id,mode,sequence,sign_ns,verify_ns,age_ns,e2e_ns,result_code
-```
-
-目前 `SignedTwist.msg` 沒有 signer processing duration 欄位，因此 MVP benchmark 保留 `sign_ns` 欄位並填 `0`。若要嚴格量測 `sign_ns`，可以在後續版本新增 signer event 或擴充 message。
-
-## 安全注意事項
-
-- demo keys 只用於展示。
-- `src/keys/signer/*.key` 不應 commit。
-- v1 不做 payload encryption。
-- v1 不做 dynamic key exchange。
-- v1 不取代 DDS-Security。
-- static trust store 只適合 MVP 和實驗用途。
-
-更多說明請看 [docs/tutorial_zh.md](docs/tutorial_zh.md)。
+- [Tutorial](docs/tutorial_en.md) / [繁體中文教學](docs/tutorial_zh.md)
+- [架構說明](docs/architecture_zh.md) / [Architecture](docs/architecture_en.md)
+- [威脅模型](docs/threat_model_zh.md) / [Threat model](docs/threat_model_en.md)
+- [訊息格式](docs/message_spec_zh.md) / [Message spec](docs/message_spec_en.md)
+- [Benchmark 說明](docs/benchmark_plan_zh.md) / [Benchmark plan](docs/benchmark_plan_en.md)

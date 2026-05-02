@@ -123,7 +123,7 @@ def plot_latency_box(
     fig, ax = plt.subplots(figsize=(9, 5))
     ax.boxplot(
         [plain_values, app_sig_values],
-        labels=labels,
+        tick_labels=labels,
         showmeans=True,
         patch_artist=True,
         boxprops={'facecolor': '#e0f2fe', 'edgecolor': '#475569'},
@@ -341,6 +341,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument('--app-sig-csv', type=Path, default=Path('/tmp/app_sig.csv'))
     parser.add_argument('--keys-dir', default='./src/keys')
     parser.add_argument('--output-dir', type=Path, default=Path('docs'))
+    parser.add_argument(
+        '--plot-only',
+        action='store_true',
+        help='Skip ROS 2 benchmark execution and regenerate plots from existing CSV files.',
+    )
     return parser.parse_args()
 
 
@@ -359,32 +364,35 @@ def main() -> int:
         ensure_parent_dirs(
             [plain_csv, app_sig_csv, latency_box_full, latency_box_zoom, latency_cdf, success_rate, summary_md]
         )
-        remove_stale_csv(plain_csv)
-        remove_stale_csv(app_sig_csv)
+        if args.plot_only:
+            log('Plot-only mode: using existing CSV files and skipping ROS 2 launch commands')
+        else:
+            remove_stale_csv(plain_csv)
+            remove_stale_csv(app_sig_csv)
 
-        run_command(
-            [
-                'ros2',
-                'launch',
-                'ros2_pqc_bringup',
-                'bench_plain.launch.py',
-                f'count:={args.count}',
-                f'rate_hz:={args.rate_hz:g}',
-                f'output_csv:={plain_csv}',
-            ]
-        )
-        run_command(
-            [
-                'ros2',
-                'launch',
-                'ros2_pqc_bringup',
-                'bench_app_sig.launch.py',
-                f'count:={args.count}',
-                f'rate_hz:={args.rate_hz:g}',
-                f'output_csv:={app_sig_csv}',
-                f'keys_dir:={args.keys_dir}',
-            ]
-        )
+            run_command(
+                [
+                    'ros2',
+                    'launch',
+                    'ros2_pqc_bringup',
+                    'bench_plain.launch.py',
+                    f'count:={args.count}',
+                    f'rate_hz:={args.rate_hz:g}',
+                    f'output_csv:={plain_csv}',
+                ]
+            )
+            run_command(
+                [
+                    'ros2',
+                    'launch',
+                    'ros2_pqc_bringup',
+                    'bench_app_sig.launch.py',
+                    f'count:={args.count}',
+                    f'rate_hz:={args.rate_hz:g}',
+                    f'output_csv:={app_sig_csv}',
+                    f'keys_dir:={args.keys_dir}',
+                ]
+            )
 
         plain = load_csv(plain_csv, 'plain')
         app_sig = load_csv(app_sig_csv, 'app_sig')
