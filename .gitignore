@@ -1,0 +1,54 @@
+# ROS 2 / colcon generated outputs
+build/
+install/
+log/
+
+# Python generated files
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# CMake generated files
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+CTestTestfile.cmake
+Makefile
+
+# Local OS / editor files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.vscode/
+.idea/
+
+# Local env / secrets
+.env
+.env.*
+
+# Local draft/spec artifacts not published with the side project
+docs/ros2-pqc-secure-comm-v1-spec.md
+
+keys/signer/*.key
+keys/signer/*.pem
+src/keys/signer/*.key
+src/keys/signer/*.pem
+keys/trust/*.key
+keys/trust/*.pem
+src/keys/trust/*.key
+src/keys/trust/*.pem
+
+# Runtime captures / benchmark outputs
+*.bag
+*.bag2
+*.mcap
+*.db3
+benchmark_results/
+results/

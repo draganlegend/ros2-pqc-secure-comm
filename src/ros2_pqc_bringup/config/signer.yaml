@@ -1,0 +1,10 @@
+ros2_pqc_signer:
+  ros__parameters:
+    source_id: "demo_source"
+    key_id: "demo_mldsa44_key_1"
+    private_key_path: "keys/signer/mldsa44_private.key"
+    sig_scheme: 1
+    hash_scheme: 1
+    ttl_ms: 500
+    topic_name: "/cmd_vel/raw"
+    payload_schema: "ros2_pqc.twist.v1"

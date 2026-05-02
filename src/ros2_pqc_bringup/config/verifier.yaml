@@ -1,0 +1,7 @@
+ros2_pqc_verifier:
+  ros__parameters:
+    trust_store_path: "keys/trust/trust_store.yaml"
+    expected_payload_schema: "ros2_pqc.twist.v1"
+    expected_payload_version: 1
+    replay_window_size: 64
+    topic_name: "/cmd_vel/raw"

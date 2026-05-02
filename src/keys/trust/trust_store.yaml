@@ -1,0 +1,6 @@
+trusted_keys:
+- source_id: demo_source
+  key_id: demo_mldsa44_key_1
+  sig_scheme: ML_DSA_44
+  public_key_path: demo_source_mldsa44_pub.key
+  enabled: true
