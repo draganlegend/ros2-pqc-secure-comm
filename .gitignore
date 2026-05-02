@@ -28,6 +28,7 @@ Thumbs.db
 *.swo
 .vscode/
 .idea/
+AGENTS.md
 
 # Local env / secrets
 .env

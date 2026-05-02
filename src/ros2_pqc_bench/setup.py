@@ -15,7 +15,7 @@ setup(
     install_requires=['setuptools'],
     zip_safe=True,
     maintainer='Mike Lee',
-    maintainer_email='mike32874225@gmail.com',
+    maintainer_email='github.granny320@passinbox.com',
     description='Benchmark runner and CSV summary tools for ros2-pqc-secure-comm.',
     license='Apache-2.0',
     tests_require=['pytest'],

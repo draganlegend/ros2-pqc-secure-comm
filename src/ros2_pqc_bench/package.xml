@@ -3,7 +3,7 @@
   <name>ros2_pqc_bench</name>
   <version>0.1.0</version>
   <description>Benchmark runner and CSV summary tools for ros2-pqc-secure-comm.</description>
-  <maintainer email="mike32874225@gmail.com">Mike Lee</maintainer>
+  <maintainer email="github.granny320@passinbox.com">Mike Lee</maintainer>
   <license>Apache-2.0</license>
 
   <buildtool_depend>ament_python</buildtool_depend>
